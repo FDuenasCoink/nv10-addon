@@ -3,7 +3,6 @@
 std::thread nativeThreadNv10;
 Napi::ThreadSafeFunction tsfnNv10;
 static bool isRunningNv10 = true;
-static bool threadEndedNv10 = true;
 
 Napi::FunctionReference NV10Wrapper::constructor;
 
@@ -180,23 +179,20 @@ Napi::Value NV10Wrapper::OnBill(const Napi::CallbackInfo &info)
       delete bill;
     };
     isRunningNv10 = true;
-    threadEndedNv10 = false;
     while (isRunningNv10) {
-      std::this_thread::sleep_for( std::chrono::milliseconds(10));
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
       BillError_t response = this->nv10Control_->GetBill();
       if (response.StatusCode == 302) continue;
       BillError_t *value = new BillError_t(response);
       napi_status status = tsfnNv10.BlockingCall(value, callback);
       if ( status != napi_ok ) break;
     }
-    threadEndedNv10 = true;
     tsfnNv10.Release();
   });
 
   auto finishFn = [] (const Napi::CallbackInfo& info) {
     isRunningNv10 = false;
-    while (!threadEndedNv10);
-    std::this_thread::sleep_for( std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     return;
   };
 
