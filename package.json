@@ -1,6 +1,6 @@
 {
   "name": "@fduenascoink/nv10-addon",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Addons to control oink nv10 in javascript",
   "repository": {
     "type": "git",
